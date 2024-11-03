@@ -15,12 +15,13 @@
         
         /* Table Styling */
         .table-container {
-            max-width: 100%;
-            overflow-x: scroll;
+            max-width: 100%; /* Fixed width for table container */
+            overflow-x: auto; /* Enable horizontal scrolling */
             position: relative;
+            white-space: nowrap;
         }
         table { 
-            width: 100%; 
+            width: auto; /* Allow table to expand based on content */
             border-collapse: collapse; 
             table-layout: fixed;
         }
@@ -29,18 +30,26 @@
             border: 1px solid #ddd; 
             text-align: right; 
             white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
         }
         th { 
             background-color: #007acc; 
             color: #fff; 
         }
-        /* Style for fixed first column */
-        td:first-child, th:first-child {
+        /* Style for the first column to auto-adjust width */
+        th:first-child, td:first-child {
+            width: auto; /* Adjusts width based on content */
             position: sticky;
             left: 0;
             background-color: #f4f4f9;
             text-align: left;
             font-weight: bold;
+            white-space: nowrap;
+        }
+        /* Fixed width for other columns */
+        th:not(:first-child), td:not(:first-child) {
+            width: 100px; /* Fixed width for all other columns */
         }
         /* Highlight selected row */
         .selected-row {
@@ -104,12 +113,12 @@
     const myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Metric 1', 'Metric 2', 'Metric 3'],  // Placeholder labels; will update with selected data
+            labels: [],  // Labels will be set dynamically
             datasets: [{
                 label: 'Finanční Výsledky',
                 data: [],
-                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'],
-                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
         },
@@ -142,7 +151,7 @@
         tableHeader.innerHTML = '';
         tableBody.innerHTML = '';
 
-        // Set headers for item and periods
+        // Set headers to cover all columns, including item names and periods
         const headers = ['Item'].concat(sheetData[0].slice(1));
         headers.forEach(headerText => {
             const th = document.createElement("th");
@@ -150,7 +159,7 @@
             tableHeader.appendChild(th);
         });
 
-        // Populate table rows with clickable functionality
+        // Populate table rows with full data set
         for (let i = 1; i < sheetData.length; i++) {
             const row = sheetData[i];
             if (!row[0]) continue;  // Skip empty rows
@@ -162,7 +171,7 @@
             itemCell.textContent = row[0];
             tr.appendChild(itemCell);
 
-            // Add data cells for each period with number formatting and right alignment
+            // Add data cells with number formatting
             const rowData = [];
             for (let j = 1; j < row.length; j++) {
                 const dataCell = document.createElement("td");
@@ -171,12 +180,14 @@
 
                 if (row[j] && !isNaN(row[j])) {
                     rowData.push(row[j]);
+                } else {
+                    rowData.push(0); // Add 0 if the column is empty
                 }
             }
 
-            // Add click event to update chart with row data and highlight the row
+            // Add click event to update chart with full row data and highlight the row
             tr.onclick = () => {
-                updateChart(row[0], rowData);
+                updateChart(sheetData[0].slice(1), row[0], rowData);  // Pass full labels and data
                 highlightSelectedRow(tr);
             };
             tableBody.appendChild(tr);
@@ -191,9 +202,9 @@
         return '-';
     }
 
-    // Update chart based on clicked row data
-    function updateChart(itemName, data) {
-        myChart.data.labels = workbookData[currentSheet][0].slice(1); // Update labels with period names
+    // Update chart with full row data
+    function updateChart(labels, itemName, data) {
+        myChart.data.labels = labels;  // Set labels to all period names
         myChart.data.datasets[0].label = itemName;
         myChart.data.datasets[0].data = data;
         myChart.update();
