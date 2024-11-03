@@ -5,106 +5,158 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Společnost A - Detaily Akcie</title>
     <style>
-        /* Basic styling for the stock page */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-        }
-        header, footer {
-            background-color: #007acc;
-            color: #fff;
-            text-align: center;
-            padding: 15px;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        .container {
-            width: 90%;
-            margin: auto;
-            overflow: hidden;
-        }
-        .stock-details {
-            background-color: #fff;
-            padding: 20px;
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #007acc;
-            color: #fff;
-        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
+        header, footer { background-color: #007acc; color: #fff; text-align: center; padding: 15px; }
+        h1, h2 { color: #333; }
+        .container { width: 90%; margin: auto; padding: 20px; }
+        .controls { display: flex; justify-content: center; margin-bottom: 20px; }
+        .dropdown { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ddd; }
+        .chart-container { max-width: 600px; margin: 20px auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #007acc; color: #fff; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<header>
-    <h1>Společnost A - Profil</h1>
-</header>
+<header><h1>Společnost A - Profil</h1></header>
 
 <div class="container">
-
-    <!-- Stock Description Section -->
     <section class="stock-details">
         <h2>O Společnosti</h2>
         <p>Společnost A se specializuje na ... (zde vložte popis společnosti).</p>
+    </section>
 
-        <!-- Metrics Section -->
-        <h2>Hlavní Metriky</h2>
-        <ul>
-            <li>Tržní kapitalizace: 500 mil. CZK</li>
-            <li>P/E Ratio: 12.5</li>
-            <li>Dividendový výnos: 3.2%</li>
-            <!-- Add more metrics as needed -->
-        </ul>
+    <!-- Controls for sheet selection -->
+    <div class="controls">
+        <select id="sheetTypeDropdown" class="dropdown" onchange="updateSheetType(this.value)">
+            <option value="Balance_sheet">Balance Sheet</option>
+            <option value="P&L">P&L</option>
+        </select>
+    </div>
 
-        <!-- Financial Table -->
+    <!-- Chart Section -->
+    <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- Financial Table -->
+    <section class="stock-details">
         <h2>Finanční Výsledky</h2>
-        <table>
+        <table id="financialTable">
             <thead>
-                <tr>
-                    <th>Rok</th>
-                    <th>Tržby (mil. CZK)</th>
-                    <th>Čistý Zisk (mil. CZK)</th>
-                    <th>EBITDA (mil. CZK)</th>
+                <tr id="tableHeader">
+                    <!-- Table headers will be populated dynamically -->
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>2021</td>
-                    <td>1200</td>
-                    <td>150</td>
-                    <td>300</td>
-                </tr>
-                <tr>
-                    <td>2022</td>
-                    <td>1300</td>
-                    <td>180</td>
-                    <td>320</td>
-                </tr>
-                <!-- Add more rows as needed -->
+            <tbody id="tableBody">
+                <!-- Table data will be populated dynamically -->
             </tbody>
         </table>
     </section>
-
 </div>
 
 <footer>
     <p>&copy; 2023 České Veřejně Obchodované Společnosti. Všechna práva vyhrazena.</p>
 </footer>
+
+<script>
+    let workbookData;
+    let currentSheet = 'Balance_sheet';
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Metric 1', 'Metric 2', 'Metric 3'],  // Placeholder labels; will update with selected data
+            datasets: [{
+                label: 'Finanční Výsledky',
+                data: [],
+                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'],
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    async function loadExcelData() {
+        const response = await fetch('data/MONETA.xlsx');  // Replace with actual file path
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        workbookData = {};
+        workbook.SheetNames.forEach(sheetName => {
+            workbookData[sheetName] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+        });
+
+        displayTableData();
+    }
+
+    function updateSheetType(sheetType) {
+        currentSheet = sheetType;
+        displayTableData();
+    }
+
+    function displayTableData() {
+        const sheetData = workbookData[currentSheet];
+        const tableHeader = document.getElementById("tableHeader");
+        const tableBody = document.getElementById("tableBody");
+
+        tableHeader.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        // Set headers for item and periods
+        const headers = ['Item'].concat(sheetData[0].slice(1));
+        headers.forEach(headerText => {
+            const th = document.createElement("th");
+            th.textContent = headerText;
+            tableHeader.appendChild(th);
+        });
+
+        // Populate table rows with clickable functionality
+        for (let i = 1; i < sheetData.length; i++) {
+            const row = sheetData[i];
+            if (!row[0]) continue;  // Skip empty rows
+
+            const tr = document.createElement("tr");
+
+            // First cell is the item name
+            const itemCell = document.createElement("td");
+            itemCell.textContent = row[0];
+            tr.appendChild(itemCell);
+
+            // Add data cells for each period and make the row clickable to update chart
+            const rowData = [];
+            for (let j = 1; j < row.length; j++) {
+                const dataCell = document.createElement("td");
+                dataCell.textContent = row[j] || '-';
+                tr.appendChild(dataCell);
+
+                if (row[j] && !isNaN(row[j])) {
+                    rowData.push(row[j]);
+                }
+            }
+
+            // Add click event to update chart with row data
+            tr.onclick = () => updateChart(row[0], rowData);
+            tableBody.appendChild(tr);
+        }
+    }
+
+    // Update chart based on clicked row data
+    function updateChart(itemName, data) {
+        myChart.data.labels = workbookData[currentSheet][0].slice(1); // Update labels with period names
+        myChart.data.datasets[0].label = itemName;
+        myChart.data.datasets[0].data = data;
+        myChart.update();
+    }
+
+    // Load data on page load
+    window.onload = loadExcelData;
+</script>
 
 </body>
 </html>
