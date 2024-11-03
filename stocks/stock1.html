@@ -9,12 +9,43 @@
         header, footer { background-color: #007acc; color: #fff; text-align: center; padding: 15px; }
         h1, h2 { color: #333; }
         .container { width: 90%; margin: auto; padding: 20px; }
-        .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .controls { display: flex; justify-content: center; margin-bottom: 20px; }
         .dropdown { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ddd; }
         .chart-container { max-width: 600px; margin: 20px auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background-color: #007acc; color: #fff; }
+        
+        /* Table Styling */
+        .table-container {
+            max-width: 100%;
+            overflow-x: auto;
+            position: relative;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed;
+        }
+        th, td { 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            text-align: right; 
+            white-space: nowrap; 
+        }
+        th { 
+            background-color: #007acc; 
+            color: #fff; 
+        }
+        /* Style for fixed first column */
+        td:first-child, th:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f4f4f9;
+            text-align: left;
+            font-weight: bold;
+        }
+        /* Highlight selected row */
+        .selected-row {
+            background-color: #d0ebff;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,15 +60,11 @@
         <p>Společnost A se specializuje na ... (zde vložte popis společnosti).</p>
     </section>
 
-    <!-- Controls for sheet selection and period selection -->
+    <!-- Controls for sheet selection -->
     <div class="controls">
         <select id="sheetTypeDropdown" class="dropdown" onchange="updateSheetType(this.value)">
             <option value="Balance_sheet">Balance Sheet</option>
             <option value="P&L">P&L</option>
-        </select>
-        
-        <select id="periodDropdown" class="dropdown" onchange="updatePeriod(this.value)">
-            <!-- Period options will be populated dynamically -->
         </select>
     </div>
 
@@ -46,19 +73,21 @@
         <canvas id="myChart"></canvas>
     </div>
 
-    <!-- Financial Table -->
+    <!-- Financial Table with horizontal scrollbar and fixed first column -->
     <section class="stock-details">
         <h2>Finanční Výsledky</h2>
-        <table id="financialTable">
-            <thead>
-                <tr id="tableHeader">
-                    <!-- Table headers will be populated dynamically -->
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- Table data will be populated dynamically -->
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table id="financialTable">
+                <thead>
+                    <tr id="tableHeader">
+                        <!-- Table headers will be populated dynamically -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Table data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
     </section>
 </div>
 
@@ -69,13 +98,13 @@
 <script>
     let workbookData;
     let currentSheet = 'Balance_sheet';
-    let availablePeriods = [];
+    let selectedRow = null;
 
     const ctx = document.getElementById('myChart').getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Tržby', 'Čistý Zisk', 'EBITDA'],
+            labels: ['Metric 1', 'Metric 2', 'Metric 3'],  // Placeholder labels; will update with selected data
             datasets: [{
                 label: 'Finanční Výsledky',
                 data: [],
@@ -97,36 +126,15 @@
             workbookData[sheetName] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
         });
 
-        populatePeriodOptions();
         displayTableData();
-    }
-
-    // Populate periods in the dropdown
-    function populatePeriodOptions() {
-        const sheetData = workbookData[currentSheet];
-        availablePeriods = sheetData[0].slice(1);
-        const periodDropdown = document.getElementById("periodDropdown");
-        
-        periodDropdown.innerHTML = '';
-        availablePeriods.forEach((period, index) => {
-            const option = document.createElement("option");
-            option.value = index + 1;
-            option.textContent = period;
-            periodDropdown.appendChild(option);
-        });
     }
 
     function updateSheetType(sheetType) {
         currentSheet = sheetType;
-        populatePeriodOptions();
         displayTableData();
     }
 
-    function updatePeriod(selectedColumnIndex) {
-        displayTableData(parseInt(selectedColumnIndex));
-    }
-
-    function displayTableData(periodIndex = 1) {
+    function displayTableData() {
         const sheetData = workbookData[currentSheet];
         const tableHeader = document.getElementById("tableHeader");
         const tableBody = document.getElementById("tableBody");
@@ -134,45 +142,70 @@
         tableHeader.innerHTML = '';
         tableBody.innerHTML = '';
 
-        // Set headers
-        const headers = ['Item', availablePeriods[periodIndex - 1]];
+        // Set headers for item and periods
+        const headers = ['Item'].concat(sheetData[0].slice(1));
         headers.forEach(headerText => {
             const th = document.createElement("th");
             th.textContent = headerText;
             tableHeader.appendChild(th);
         });
 
-        // Populate table rows
-        const chartData = [];
+        // Populate table rows with clickable functionality
         for (let i = 1; i < sheetData.length; i++) {
             const row = sheetData[i];
-            if (!row[0]) continue;
+            if (!row[0]) continue;  // Skip empty rows
 
             const tr = document.createElement("tr");
 
+            // First cell is the item name
             const itemCell = document.createElement("td");
             itemCell.textContent = row[0];
             tr.appendChild(itemCell);
 
-            const dataCell = document.createElement("td");
-            dataCell.textContent = row[periodIndex];
-            tr.appendChild(dataCell);
+            // Add data cells for each period with number formatting and right alignment
+            const rowData = [];
+            for (let j = 1; j < row.length; j++) {
+                const dataCell = document.createElement("td");
+                dataCell.textContent = formatNumber(row[j]);
+                tr.appendChild(dataCell);
 
-            tableBody.appendChild(tr);
-
-            // Collect data for chart
-            if (row[periodIndex] && !isNaN(row[periodIndex])) {
-                chartData.push(row[periodIndex]);
+                if (row[j] && !isNaN(row[j])) {
+                    rowData.push(row[j]);
+                }
             }
-        }
 
-        updateChart(chartData);
+            // Add click event to update chart with row data and highlight the row
+            tr.onclick = () => {
+                updateChart(row[0], rowData);
+                highlightSelectedRow(tr);
+            };
+            tableBody.appendChild(tr);
+        }
     }
 
-    // Update chart based on selected period data
-    function updateChart(data) {
+    // Function to format numbers with thousands separator
+    function formatNumber(number) {
+        if (number && !isNaN(number)) {
+            return number.toLocaleString('cs-CZ');
+        }
+        return '-';
+    }
+
+    // Update chart based on clicked row data
+    function updateChart(itemName, data) {
+        myChart.data.labels = workbookData[currentSheet][0].slice(1); // Update labels with period names
+        myChart.data.datasets[0].label = itemName;
         myChart.data.datasets[0].data = data;
         myChart.update();
+    }
+
+    // Highlight the selected row
+    function highlightSelectedRow(row) {
+        if (selectedRow) {
+            selectedRow.classList.remove('selected-row');
+        }
+        row.classList.add('selected-row');
+        selectedRow = row;
     }
 
     // Load data on page load
