@@ -3,55 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Data Viewer</title>
+    <title>Společnost A - Detaily Akcie</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
         header, footer { background-color: #007acc; color: #fff; text-align: center; padding: 15px; }
         h1, h2 { color: #333; }
         .container { width: 90%; margin: auto; padding: 20px; }
         .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .dropdown { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ddd; }
+        .chart-container { max-width: 600px; margin: 20px auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
         th { background-color: #007acc; color: #fff; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<header>
-    <h1>Financial Data Viewer</h1>
-</header>
+<header><h1>Společnost A - Profil</h1></header>
 
 <div class="container">
+    <section class="stock-details">
+        <h2>O Společnosti</h2>
+        <p>Společnost A se specializuje na ... (zde vložte popis společnosti).</p>
+    </section>
+
+    <!-- Controls for sheet selection and period selection -->
     <div class="controls">
-        <!-- Dropdown to select sheet type (Balance Sheet or P&L) -->
         <select id="sheetTypeDropdown" class="dropdown" onchange="updateSheetType(this.value)">
             <option value="Balance_sheet">Balance Sheet</option>
             <option value="P&L">P&L</option>
         </select>
         
-        <!-- Dropdown to select period (quarter) -->
         <select id="periodDropdown" class="dropdown" onchange="updatePeriod(this.value)">
-            <!-- Options will be populated dynamically -->
+            <!-- Period options will be populated dynamically -->
         </select>
     </div>
 
-    <!-- Table to display the financial data -->
-    <table id="financialTable">
-        <thead>
-            <tr id="tableHeader">
-                <!-- Table headers will be populated dynamically -->
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- Table data will be populated dynamically -->
-        </tbody>
-    </table>
+    <!-- Chart Section -->
+    <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- Financial Table -->
+    <section class="stock-details">
+        <h2>Finanční Výsledky</h2>
+        <table id="financialTable">
+            <thead>
+                <tr id="tableHeader">
+                    <!-- Table headers will be populated dynamically -->
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Table data will be populated dynamically -->
+            </tbody>
+        </table>
+    </section>
 </div>
 
 <footer>
-    <p>&copy; 2023 Financial Data Viewer. All rights reserved.</p>
+    <p>&copy; 2023 České Veřejně Obchodované Společnosti. Všechna práva vyhrazena.</p>
 </footer>
 
 <script>
@@ -59,9 +71,24 @@
     let currentSheet = 'Balance_sheet';
     let availablePeriods = [];
 
-    // Load the Excel file and initialize data
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Tržby', 'Čistý Zisk', 'EBITDA'],
+            datasets: [{
+                label: 'Finanční Výsledky',
+                data: [],
+                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'],
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
     async function loadExcelData() {
-        const response = await fetch('data/MONETA.xlsx');  // Update path as needed
+        const response = await fetch('path/to/MONETA.xlsx');  // Replace with actual file path
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         
@@ -74,43 +101,40 @@
         displayTableData();
     }
 
-    // Populate period dropdown based on available periods in the sheet
+    // Populate periods in the dropdown
     function populatePeriodOptions() {
         const sheetData = workbookData[currentSheet];
-        availablePeriods = sheetData[0].slice(1);  // Periods are in the first row (excluding first column)
+        availablePeriods = sheetData[0].slice(1);
         const periodDropdown = document.getElementById("periodDropdown");
         
-        periodDropdown.innerHTML = '';  // Clear existing options
+        periodDropdown.innerHTML = '';
         availablePeriods.forEach((period, index) => {
             const option = document.createElement("option");
-            option.value = index + 1;  // Store the column index
+            option.value = index + 1;
             option.textContent = period;
             periodDropdown.appendChild(option);
         });
     }
 
-    // Update the current sheet type and refresh data display
     function updateSheetType(sheetType) {
         currentSheet = sheetType;
         populatePeriodOptions();
         displayTableData();
     }
 
-    // Update the displayed data based on selected period
     function updatePeriod(selectedColumnIndex) {
         displayTableData(parseInt(selectedColumnIndex));
     }
 
-    // Display data in the table based on the selected sheet and period
     function displayTableData(periodIndex = 1) {
         const sheetData = workbookData[currentSheet];
         const tableHeader = document.getElementById("tableHeader");
         const tableBody = document.getElementById("tableBody");
 
-        tableHeader.innerHTML = '';  // Clear the existing table header
-        tableBody.innerHTML = '';  // Clear the existing table body
+        tableHeader.innerHTML = '';
+        tableBody.innerHTML = '';
 
-        // Set headers (Row 0 contains headers)
+        // Set headers
         const headers = ['Item', availablePeriods[periodIndex - 1]];
         headers.forEach(headerText => {
             const th = document.createElement("th");
@@ -119,27 +143,39 @@
         });
 
         // Populate table rows
+        const chartData = [];
         for (let i = 1; i < sheetData.length; i++) {
             const row = sheetData[i];
-            if (!row[0]) continue;  // Skip empty rows
+            if (!row[0]) continue;
 
             const tr = document.createElement("tr");
 
-            // First cell is the row item name
             const itemCell = document.createElement("td");
             itemCell.textContent = row[0];
             tr.appendChild(itemCell);
 
-            // Second cell is the selected period's data
             const dataCell = document.createElement("td");
             dataCell.textContent = row[periodIndex];
             tr.appendChild(dataCell);
 
             tableBody.appendChild(tr);
+
+            // Collect data for chart
+            if (row[periodIndex] && !isNaN(row[periodIndex])) {
+                chartData.push(row[periodIndex]);
+            }
         }
+
+        updateChart(chartData);
     }
 
-    // Load the data on page load
+    // Update chart based on selected period data
+    function updateChart(data) {
+        myChart.data.datasets[0].data = data;
+        myChart.update();
+    }
+
+    // Load data on page load
     window.onload = loadExcelData;
 </script>
 
