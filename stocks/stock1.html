@@ -126,7 +126,7 @@
     });
 
     async function loadExcelData() {
-        const response = await fetch('data/MONETA.xlsx');  // Replace with actual file path
+        const response = await fetch('data/KB.xlsx');  // Replace with actual file path
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         
