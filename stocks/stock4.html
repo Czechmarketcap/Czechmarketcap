@@ -105,7 +105,6 @@
 </footer>
 
 <script>
-    const MAX_COLUMNS_DISPLAYED = 15;  // Limit initial display to 15 columns
     let workbookData;
     let currentSheet = 'Balance_sheet';
     let selectedRow = null;
@@ -114,12 +113,12 @@
     const myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: Array(MAX_COLUMNS_DISPLAYED - 1).fill(""),  // Placeholder labels for up to 15 columns
+            labels: [],  // Labels will be set dynamically
             datasets: [{
                 label: 'Finanční Výsledky',
-                data: Array(MAX_COLUMNS_DISPLAYED - 1).fill(0),  // Placeholder data
-                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'],
-                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'],
+                data: [],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
         },
@@ -152,7 +151,7 @@
         tableHeader.innerHTML = '';
         tableBody.innerHTML = '';
 
-        // Set headers, allowing for all columns but only showing 15 at a time within the viewport
+        // Set headers to cover all columns, including item names and periods
         const headers = ['Item'].concat(sheetData[0].slice(1));
         headers.forEach(headerText => {
             const th = document.createElement("th");
@@ -160,7 +159,7 @@
             tableHeader.appendChild(th);
         });
 
-        // Populate table rows with all columns, with horizontal scroll for additional columns
+        // Populate table rows with full data set
         for (let i = 1; i < sheetData.length; i++) {
             const row = sheetData[i];
             if (!row[0]) continue;  // Skip empty rows
@@ -186,9 +185,9 @@
                 }
             }
 
-            // Add click event to update chart with row data and highlight the row
+            // Add click event to update chart with full row data and highlight the row
             tr.onclick = () => {
-                updateChart(row[0], rowData);
+                updateChart(sheetData[0].slice(1), row[0], rowData);  // Pass full labels and data
                 highlightSelectedRow(tr);
             };
             tableBody.appendChild(tr);
@@ -203,9 +202,9 @@
         return '-';
     }
 
-    // Update chart based on clicked row data
-    function updateChart(itemName, data) {
-        myChart.data.labels = workbookData[currentSheet][0].slice(1, MAX_COLUMNS_DISPLAYED); // Update labels with period names
+    // Update chart with full row data
+    function updateChart(labels, itemName, data) {
+        myChart.data.labels = labels;  // Set labels to all period names
         myChart.data.datasets[0].label = itemName;
         myChart.data.datasets[0].data = data;
         myChart.update();
