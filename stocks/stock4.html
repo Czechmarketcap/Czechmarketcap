@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Table with Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .table-container {
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+        .chart-container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chart-container">
+    <canvas id="myChart"></canvas>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Value 1</th>
+                <th>Value 2</th>
+                <th>Value 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr onclick="updateChart('Category A', [10, 20, 30])">
+                <td>Category A</td>
+                <td>10</td>
+                <td>20</td>
+                <td>30</td>
+            </tr>
+            <tr onclick="updateChart('Category B', [15, 25, 35])">
+                <td>Category B</td>
+                <td>15</td>
+                <td>25</td>
+                <td>35</td>
+            </tr>
+            <tr onclick="updateChart('Category C', [20, 30, 40])">
+                <td>Category C</td>
+                <td>20</td>
+                <td>30</td>
+                <td>40</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Initialize Chart.js chart
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Value 1', 'Value 2', 'Value 3'], // Initial labels
+            datasets: [{
+                label: 'Category A',
+                data: [10, 20, 30], // Initial data
+                backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+                borderColor: ['rgba(75, 192, 192, 1)'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Function to update chart based on table row click
+    function updateChart(category, data) {
+        myChart.data.datasets[0].label = category;
+        myChart.data.datasets[0].data = data;
+        myChart.update();
+    }
+</script>
+
+</body>
+</html>
