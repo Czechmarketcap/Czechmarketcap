@@ -15,16 +15,15 @@
         
         /* Table Styling */
         .table-container {
-            max-width: 100%;
-            overflow-x: auto;
+            max-width: 100%; /* Fixed width for table container */
+            overflow-x: auto; /* Enable horizontal scrolling */
             position: relative;
             white-space: nowrap;
         }
         table { 
-            width: 100%; 
+            width: auto; /* Allow table to expand based on content */
             border-collapse: collapse; 
             table-layout: fixed;
-            max-width: 1500px; /* Maximum width for 15 columns */
         }
         th, td { 
             padding: 10px; 
@@ -38,7 +37,7 @@
             background-color: #007acc; 
             color: #fff; 
         }
-        /* Style for first column to auto-adjust width */
+        /* Style for the first column to auto-adjust width */
         th:first-child, td:first-child {
             width: auto; /* Adjusts width based on content */
             position: sticky;
@@ -153,15 +152,15 @@
         tableHeader.innerHTML = '';
         tableBody.innerHTML = '';
 
-        // Set headers, limiting to MAX_COLUMNS_DISPLAYED
+        // Set headers, allowing for all columns but only showing 15 at a time within the viewport
         const headers = ['Item'].concat(sheetData[0].slice(1));
-        headers.slice(0, MAX_COLUMNS_DISPLAYED).forEach(headerText => {
+        headers.forEach(headerText => {
             const th = document.createElement("th");
             th.textContent = headerText;
             tableHeader.appendChild(th);
         });
 
-        // Populate table rows with up to MAX_COLUMNS_DISPLAYED columns visible
+        // Populate table rows with all columns, with horizontal scroll for additional columns
         for (let i = 1; i < sheetData.length; i++) {
             const row = sheetData[i];
             if (!row[0]) continue;  // Skip empty rows
@@ -173,9 +172,9 @@
             itemCell.textContent = row[0];
             tr.appendChild(itemCell);
 
-            // Add data cells with number formatting, limiting to MAX_COLUMNS_DISPLAYED
+            // Add data cells with number formatting
             const rowData = [];
-            for (let j = 1; j < Math.min(row.length, MAX_COLUMNS_DISPLAYED); j++) {
+            for (let j = 1; j < row.length; j++) {
                 const dataCell = document.createElement("td");
                 dataCell.textContent = formatNumber(row[j]);
                 tr.appendChild(dataCell);
