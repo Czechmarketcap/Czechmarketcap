@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Společnost A - Detaily Akcie</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
+        header, footer { background-color: #007acc; color: #fff; text-align: center; padding: 15px; }
+        h1, h2 { color: #333; }
+        .container { width: 90%; margin: auto; padding: 20px; }
+        .controls { display: flex; justify-content: center; margin-bottom: 20px; }
+        .dropdown { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ddd; }
+        .chart-container { max-width: 600px; margin: 20px auto; }
+        
+        /* Table Styling */
+        .table-container {
+            max-width: 100%; /* Fixed width for table container */
+            overflow-x: auto; /* Enable horizontal scrolling */
+            position: relative;
+            white-space: nowrap;
+        }
+        table { 
+            width: auto; /* Allow table to expand based on content */
+            border-collapse: collapse; 
+            table-layout: fixed;
+        }
+        th, td { 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            text-align: right; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        th { 
+            background-color: #007acc; 
+            color: #fff; 
+        }
+        /* Style for the first column to auto-adjust width */
+        th:first-child, td:first-child {
+            width: auto; /* Adjusts width based on content */
+            position: sticky;
+            left: 0;
+            background-color: #f4f4f9;
+            text-align: left;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        /* Fixed width for other columns */
+        th:not(:first-child), td:not(:first-child) {
+            width: 100px; /* Fixed width for all other columns */
+        }
+        /* Highlight selected row */
+        .selected-row {
+            background-color: #d0ebff;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header><h1>Společnost A - Profil</h1></header>
+
+<div class="container">
+    <section class="stock-details">
+        <h2>O Společnosti</h2>
+        <p>Společnost A se specializuje na ... (zde vložte popis společnosti).</p>
+    </section>
+
+    <!-- Controls for sheet selection -->
+    <div class="controls">
+        <select id="sheetTypeDropdown" class="dropdown" onchange="updateSheetType(this.value)">
+            <option value="Balance_sheet">Balance Sheet</option>
+            <option value="P&L">P&L</option>
+        </select>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- Financial Table with horizontal scrollbar and fixed first column -->
+    <section class="stock-details">
+        <h2>Finanční Výsledky</h2>
+        <div class="table-container">
+            <table id="financialTable">
+                <thead>
+                    <tr id="tableHeader">
+                        <!-- Table headers will be populated dynamically -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Table data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <p>&copy; 2023 České Veřejně Obchodované Společnosti. Všechna práva vyhrazena.</p>
+</footer>
+
+<script>
+    let workbookData;
+    let currentSheet = 'Balance_sheet';
+    let selectedRow = null;
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [],  // Labels will be set dynamically
+            datasets: [{
+                label: 'Finanční Výsledky',
+                data: [],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    async function loadExcelData() {
+        const response = await fetch('data/COLT.xlsx');  // Replace with actual file path
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        workbookData = {};
+        workbook.SheetNames.forEach(sheetName => {
+            workbookData[sheetName] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+        });
+
+        displayTableData();
+    }
+
+    function updateSheetType(sheetType) {
+        currentSheet = sheetType;
+        displayTableData();
+    }
+
+    function displayTableData() {
+        const sheetData = workbookData[currentSheet];
+        const tableHeader = document.getElementById("tableHeader");
+        const tableBody = document.getElementById("tableBody");
+
+        tableHeader.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        // Set headers to cover all columns, including item names and periods
+        const headers = ['Item'].concat(sheetData[0].slice(1));
+        headers.forEach(headerText => {
+            const th = document.createElement("th");
+            th.textContent = headerText;
+            tableHeader.appendChild(th);
+        });
+
+        // Populate table rows with full data set
+        for (let i = 1; i < sheetData.length; i++) {
+            const row = sheetData[i];
+            if (!row[0]) continue;  // Skip empty rows
+
+            const tr = document.createElement("tr");
+
+            // First cell is the item name
+            const itemCell = document.createElement("td");
+            itemCell.textContent = row[0];
+            tr.appendChild(itemCell);
+
+            // Add data cells with number formatting
+            const rowData = [];
+            for (let j = 1; j < row.length; j++) {
+                const dataCell = document.createElement("td");
+                dataCell.textContent = formatNumber(row[j]);
+                tr.appendChild(dataCell);
+
+                if (row[j] && !isNaN(row[j])) {
+                    rowData.push(row[j]);
+                } else {
+                    rowData.push(0); // Add 0 if the column is empty
+                }
+            }
+
+            // Add click event to update chart with full row data and highlight the row
+            tr.onclick = () => {
+                updateChart(sheetData[0].slice(1), row[0], rowData);  // Pass full labels and data
+                highlightSelectedRow(tr);
+            };
+            tableBody.appendChild(tr);
+        }
+    }
+
+    // Function to format numbers with thousands separator
+    function formatNumber(number) {
+        if (number && !isNaN(number)) {
+            return number.toLocaleString('cs-CZ');
+        }
+        return '-';
+    }
+
+    // Update chart with full row data
+    function updateChart(labels, itemName, data) {
+        myChart.data.labels = labels;  // Set labels to all period names
+        myChart.data.datasets[0].label = itemName;
+        myChart.data.datasets[0].data = data;
+        myChart.update();
+    }
+
+    // Highlight the selected row
+    function highlightSelectedRow(row) {
+        if (selectedRow) {
+            selectedRow.classList.remove('selected-row');
+        }
+        row.classList.add('selected-row');
+        selectedRow = row;
+    }
+
+    // Load data on page load
+    window.onload = loadExcelData;
+</script>
+
+</body>
+</html>
