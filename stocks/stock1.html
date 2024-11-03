@@ -61,7 +61,7 @@
 
     // Load the Excel file and initialize data
     async function loadExcelData() {
-        const response = await fetch('path/to/MONETA.xlsx');  // Update path as needed
+        const response = await fetch('data/MONETA.xlsx');  // Update path as needed
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         
