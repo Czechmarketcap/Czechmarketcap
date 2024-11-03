@@ -47,7 +47,12 @@
             background-color: #007acc;
             color: #fff;
         }
+        .chart-container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -70,10 +75,17 @@
             <li>Dividendový výnos: 3.2%</li>
             <!-- Add more metrics as needed -->
         </ul>
+    </section>
 
-        <!-- Financial Table -->
+    <!-- Chart Section -->
+    <div class="chart-container">
+        <canvas id="myChart"></canvas> <!-- Placeholder for the chart -->
+    </div>
+
+    <!-- Financial Table with Interactive Rows -->
+    <section class="stock-details">
         <h2>Finanční Výsledky</h2>
-        <table>
+        <table id="financial-table">
             <thead>
                 <tr>
                     <th>Rok</th>
@@ -83,19 +95,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
+                <tr onclick="updateChart('2021', [1200, 150, 300])">
                     <td>2021</td>
                     <td>1200</td>
                     <td>150</td>
                     <td>300</td>
                 </tr>
-                <tr>
+                <tr onclick="updateChart('2022', [1300, 180, 320])">
                     <td>2022</td>
                     <td>1300</td>
                     <td>180</td>
                     <td>320</td>
                 </tr>
-                <!-- Add more rows as needed -->
+                <tr onclick="updateChart('2023', [1400, 200, 350])">
+                    <td>2023</td>
+                    <td>1400</td>
+                    <td>200</td>
+                    <td>350</td>
+                </tr>
             </tbody>
         </table>
     </section>
@@ -106,5 +123,47 @@
     <p>&copy; 2023 České Veřejně Obchodované Společnosti. Všechna práva vyhrazena.</p>
 </footer>
 
+<script>
+    // Initialize Chart.js chart
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Tržby', 'Čistý Zisk', 'EBITDA'], // Labels for the dataset
+            datasets: [{
+                label: 'Finanční Výsledky 2021',
+                data: [1200, 150, 300], // Initial data (for 2021)
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(153, 102, 255, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Update chart function when a row is clicked
+    function updateChart(year, data) {
+        myChart.data.datasets[0].label = 'Finanční Výsledky ' + year;
+        myChart.data.datasets[0].data = data;
+        myChart.update();
+    }
+</script>
+
 </body>
 </html>
+
