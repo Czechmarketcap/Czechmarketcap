@@ -17,6 +17,9 @@
             color: #fff;
             text-align: left;
             padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         h1, h2 {
             color: #333;
@@ -25,6 +28,33 @@
             width: 90%;
             margin: auto;
             overflow: hidden;
+        }
+
+        /* Navigation styling */
+        nav {
+            display: flex;
+            gap: 15px;
+            font-size: 1.1em;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+        }
+        nav a:hover {
+            background-color: #005a99;
+            border-radius: 5px;
+        }
+
+        /* Search bar styling */
+        .search-bar {
+            display: flex;
+            align-items: center;
+        }
+        .search-bar input[type="text"] {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
         }
 
         /* About Us section styling */
@@ -55,46 +85,61 @@
             background-color: #e8f4fc;
         }
 
-        /* Stock page styling */
-        .stock-details {
-            background-color: #fff;
+        /* News section styling */
+        .news {
+            background: #fff;
             padding: 20px;
-            margin: 20px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
+            margin: 20px 0;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
+
+        /* Ad placeholders styling */
+        .ad-placeholder {
+            background-color: #f4f4f4;
+            border: 1px dashed #aaa;
+            text-align: center;
             padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #007acc;
-            color: #fff;
+            margin: 20px 0;
+            color: #555;
+            font-size: 0.9em;
         }
     </style>
+    <!-- Google AdSense code (replace with your actual AdSense client ID) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 </head>
 <body>
 
 <header>
-    <h1>CzechMarketCap</h1>
+    <div class="logo">
+        <h1>CzechMarketCap</h1>
+    </div>
+    <nav>
+        <a href="#about">O nás</a>
+        <a href="#stocks">Akcie</a>
+        <a href="#news">Novinky</a>
+    </nav>
+    <div class="search-bar">
+        <input type="text" placeholder="Hledat...">
+    </div>
 </header>
 
 <div class="container">
 
     <!-- About Us Section -->
-    <section class="about">
+    <section id="about" class="about">
         <h2>O Nás</h2>
         <p>Naším cílem je poskytovat komplexní data o veřejně obchodovaných společnostech v České republice. Sledujeme finanční výkazy, tržní trendy a další důležité metriky, abychom našim uživatelům přinášeli spolehlivé informace pro jejich investiční rozhodnutí.</p>
     </section>
 
+    <!-- Ad placeholder after About Us section -->
+    <div class="ad-placeholder">
+        <!-- Google AdSense code for banner ad -->
+        <p>Ad Placeholder (Google AdSense banner ad)</p>
+    </div>
+
     <!-- Stock Grid Section -->
-    <section class="stocks">
+    <section id="stocks" class="stocks">
         <h2>Akcie Společností</h2>
         <div class="stock-grid">
             <!-- Example Stock Item -->
@@ -109,6 +154,30 @@
             <!-- Add more stocks as needed -->
         </div>
     </section>
+
+    <!-- Ad placeholder after Stock Grid section -->
+    <div class="ad-placeholder">
+        <!-- Google AdSense code for sidebar ad -->
+        <p>Ad Placeholder (Google AdSense sidebar ad)</p>
+    </div>
+
+    <!-- News Section -->
+    <section id="news" class="news">
+        <h2>Novinky</h2>
+        <p>Zde najdete aktuální informace a novinky týkající se veřejně obchodovaných společností v České republice.</p>
+        <ul>
+            <li><a href="#">Nová regulace ovlivní ceny akcií ve střední Evropě</a></li>
+            <li><a href="#">Komerční Banka oznámila rekordní zisky za Q3</a></li>
+            <li><a href="#">ČEZ plánuje expanzi na zahraniční trhy</a></li>
+            <!-- Add more news items as needed -->
+        </ul>
+    </section>
+
+    <!-- Ad placeholder after News section -->
+    <div class="ad-placeholder">
+        <!-- Google AdSense code for bottom banner ad -->
+        <p>Ad Placeholder (Google AdSense bottom banner ad)</p>
+    </div>
 
 </div>
 
