@@ -3,240 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Společnost A - Detaily Akcie</title>
+    <title>Financial Data Viewer</title>
     <style>
-        /* Basic styling for the stock page */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-        }
-        header, footer {
-            background-color: #007acc;
-            color: #fff;
-            text-align: center;
-            padding: 15px;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        .container {
-            width: 90%;
-            margin: auto;
-            overflow: hidden;
-        }
-        .stock-details {
-            background-color: #fff;
-            padding: 20px;
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #007acc;
-            color: #fff;
-        }
-        .chart-container {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .toggle-button, .statement-select {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007acc;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .toggle-button:hover, .statement-select:hover {
-            background-color: #005f8f;
-        }
-        .statement-select {
-            color: #333;
-            background-color: #f4f4f9;
-            cursor: pointer;
-            padding: 8px;
-            font-size: 16px;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }
+        header, footer { background-color: #007acc; color: #fff; text-align: center; padding: 15px; }
+        h1, h2 { color: #333; }
+        .container { width: 90%; margin: auto; padding: 20px; }
+        .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .dropdown { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #007acc; color: #fff; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
 
 <header>
-    <h1>Společnost A - Profil</h1>
+    <h1>Financial Data Viewer</h1>
 </header>
 
 <div class="container">
-
-    <!-- Stock Description Section -->
-    <section class="stock-details">
-        <h2>O Společnosti</h2>
-        <p>Společnost A se specializuje na ... (zde vložte popis společnosti).</p>
-
-        <!-- Metrics Section -->
-        <h2>Hlavní Metriky</h2>
-        <ul>
-            <li>Tržní kapitalizace: 500 mil. CZK</li>
-            <li>P/E Ratio: 12.5</li>
-            <li>Dividendový výnos: 3.2%</li>
-            <!-- Add more metrics as needed -->
-        </ul>
-    </section>
-
-    <!-- Controls for Quarterly/Yearly and Statement Type -->
     <div class="controls">
-        <button class="toggle-button" onclick="toggleData()">Zobrazit Čtvrtletní / Roční Výsledky</button>
-        <select class="statement-select" onchange="changeStatementType(this.value)">
-            <option value="general">General</option>
-            <option value="income">Income Statement</option>
-            <option value="balance">Balance Sheet</option>
-            <option value="cashflow">Cash Flow Statement</option>
+        <!-- Dropdown to select sheet type (Balance Sheet or P&L) -->
+        <select id="sheetTypeDropdown" class="dropdown" onchange="updateSheetType(this.value)">
+            <option value="Balance_sheet">Balance Sheet</option>
+            <option value="P&L">P&L</option>
+        </select>
+        
+        <!-- Dropdown to select period (quarter) -->
+        <select id="periodDropdown" class="dropdown" onchange="updatePeriod(this.value)">
+            <!-- Options will be populated dynamically -->
         </select>
     </div>
 
-    <!-- Chart Section -->
-    <div class="chart-container">
-        <canvas id="myChart"></canvas> <!-- Placeholder for the chart -->
-    </div>
-
-    <!-- Financial Table with Interactive Rows -->
-    <section class="stock-details">
-        <h2>Finanční Výsledky</h2>
-        <table id="financial-table">
-            <thead>
-                <tr>
-                    <th>Rok</th>
-                    <th>Tržby (mil. CZK)</th>
-                    <th>Čistý Zisk (mil. CZK)</th>
-                    <th>EBITDA (mil. CZK)</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <!-- Rows will be dynamically updated based on selected data type -->
-            </tbody>
-        </table>
-    </section>
-
+    <!-- Table to display the financial data -->
+    <table id="financialTable">
+        <thead>
+            <tr id="tableHeader">
+                <!-- Table headers will be populated dynamically -->
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Table data will be populated dynamically -->
+        </tbody>
+    </table>
 </div>
 
 <footer>
-    <p>&copy; 2023 České Veřejně Obchodované Společnosti. Všechna práva vyhrazena.</p>
+    <p>&copy; 2023 Financial Data Viewer. All rights reserved.</p>
 </footer>
 
 <script>
-    // Sample data for different statements
-    const dataSets = {
-        general: [
-            { year: '2021', revenues: 1200, netIncome: 150, ebitda: 300 },
-            { year: '2022', revenues: 1300, netIncome: 180, ebitda: 320 },
-            { year: '2023', revenues: 1400, netIncome: 200, ebitda: 350 }
-        ],
-        income: [
-            { year: '2021', revenues: 1100, netIncome: 100, ebitda: 200 },
-            { year: '2022', revenues: 1200, netIncome: 130, ebitda: 220 },
-            { year: '2023', revenues: 1300, netIncome: 150, ebitda: 250 }
-        ],
-        balance: [
-            { year: '2021', assets: 2000, liabilities: 1200, equity: 800 },
-            { year: '2022', assets: 2200, liabilities: 1300, equity: 900 },
-            { year: '2023', assets: 2400, liabilities: 1400, equity: 1000 }
-        ],
-        cashflow: [
-            { year: '2021', operating: 400, investing: -100, financing: 200 },
-            { year: '2022', operating: 450, investing: -120, financing: 220 },
-            { year: '2023', operating: 500, investing: -150, financing: 250 }
-        ]
-    };
+    let workbookData;
+    let currentSheet = 'Balance_sheet';
+    let availablePeriods = [];
 
-    let isYearly = true;
-    let currentStatement = 'general';
-
-    // Initialize Chart.js chart
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Tržby', 'Čistý Zisk', 'EBITDA'], // Default labels for General statement
-            datasets: [{
-                label: 'Finanční Výsledky 2021',
-                data: [1200, 150, 300],
-                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'],
-                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true } }
-        }
-    });
-
-    function updateChart(year, data) {
-        myChart.data.datasets[0].label = 'Finanční Výsledky ' + year;
-        myChart.data.datasets[0].data = data;
-        myChart.update();
-    }
-
-    function toggleData() {
-        isYearly = !isYearly;
-        populateTable();
-    }
-
-    function changeStatementType(type) {
-        currentStatement = type;
-        updateChartLabels();
-        populateTable();
-    }
-
-    function updateChartLabels() {
-        const labels = {
-            general: ['Tržby', 'Čistý Zisk', 'EBITDA'],
-            income: ['Revenues', 'Net Income', 'EBITDA'],
-            balance: ['Assets', 'Liabilities', 'Equity'],
-            cashflow: ['Operating', 'Investing', 'Financing']
-        };
-        myChart.data.labels = labels[currentStatement];
-        myChart.update();
-    }
-
-    function populateTable() {
-        const tableBody = document.getElementById("table-body");
-        tableBody.innerHTML = "";
-        const data = dataSets[currentStatement];
+    // Load the Excel file and initialize data
+    async function loadExcelData() {
+        const response = await fetch('path/to/MONETA.xlsx');  // Update path as needed
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         
-        data.forEach(item => {
-            const row = document.createElement("tr");
-            const values = Object.values(item).slice(1);
-            row.innerHTML = `<td>${item.year}</td><td>${values[0]}</td><td>${values[1]}</td><td>${values[2]}</td>`;
-            row.onclick = () => updateChart(item.year, values);
-            tableBody.appendChild(row);
+        workbookData = {};
+        workbook.SheetNames.forEach(sheetName => {
+            workbookData[sheetName] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
         });
 
-        updateChart(data[0].year, Object.values(data[0]).slice(1));
+        populatePeriodOptions();
+        displayTableData();
     }
 
-    // Initial load
-    populateTable();
+    // Populate period dropdown based on available periods in the sheet
+    function populatePeriodOptions() {
+        const sheetData = workbookData[currentSheet];
+        availablePeriods = sheetData[0].slice(1);  // Periods are in the first row (excluding first column)
+        const periodDropdown = document.getElementById("periodDropdown");
+        
+        periodDropdown.innerHTML = '';  // Clear existing options
+        availablePeriods.forEach((period, index) => {
+            const option = document.createElement("option");
+            option.value = index + 1;  // Store the column index
+            option.textContent = period;
+            periodDropdown.appendChild(option);
+        });
+    }
+
+    // Update the current sheet type and refresh data display
+    function updateSheetType(sheetType) {
+        currentSheet = sheetType;
+        populatePeriodOptions();
+        displayTableData();
+    }
+
+    // Update the displayed data based on selected period
+    function updatePeriod(selectedColumnIndex) {
+        displayTableData(parseInt(selectedColumnIndex));
+    }
+
+    // Display data in the table based on the selected sheet and period
+    function displayTableData(periodIndex = 1) {
+        const sheetData = workbookData[currentSheet];
+        const tableHeader = document.getElementById("tableHeader");
+        const tableBody = document.getElementById("tableBody");
+
+        tableHeader.innerHTML = '';  // Clear the existing table header
+        tableBody.innerHTML = '';  // Clear the existing table body
+
+        // Set headers (Row 0 contains headers)
+        const headers = ['Item', availablePeriods[periodIndex - 1]];
+        headers.forEach(headerText => {
+            const th = document.createElement("th");
+            th.textContent = headerText;
+            tableHeader.appendChild(th);
+        });
+
+        // Populate table rows
+        for (let i = 1; i < sheetData.length; i++) {
+            const row = sheetData[i];
+            if (!row[0]) continue;  // Skip empty rows
+
+            const tr = document.createElement("tr");
+
+            // First cell is the row item name
+            const itemCell = document.createElement("td");
+            itemCell.textContent = row[0];
+            tr.appendChild(itemCell);
+
+            // Second cell is the selected period's data
+            const dataCell = document.createElement("td");
+            dataCell.textContent = row[periodIndex];
+            tr.appendChild(dataCell);
+
+            tableBody.appendChild(tr);
+        }
+    }
+
+    // Load the data on page load
+    window.onload = loadExcelData;
 </script>
 
 </body>
