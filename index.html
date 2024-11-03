@@ -104,9 +104,61 @@
             color: #555;
             font-size: 0.9em;
         }
+
+        /* Footer styling */
+        footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+        }
+        footer a {
+            color: #fff;
+            text-decoration: underline;
+            margin-left: 10px;
+        }
+
+        /* Cookie Consent styling */
+        .cookie-consent {
+            display: none; /* Initially hidden */
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+        .cookie-consent button {
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .cookie-consent button:hover {
+            background-color: #005a99;
+        }
     </style>
-    <!-- Google AdSense code (replace with your actual AdSense client ID) -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+        // Check for cookie consent on page load
+        window.addEventListener('load', () => {
+            if (!localStorage.getItem('cookieConsentAccepted')) {
+                document.querySelector('.cookie-consent').style.display = 'block';
+            }
+        });
+
+        // Handle cookie consent acceptance
+        function acceptCookies() {
+            localStorage.setItem('cookieConsentAccepted', 'true');
+            document.querySelector('.cookie-consent').style.display = 'none';
+        }
+    </script>
 </head>
 <body>
 
@@ -134,7 +186,6 @@
 
     <!-- Ad placeholder after About Us section -->
     <div class="ad-placeholder">
-        <!-- Google AdSense code for banner ad -->
         <p>Ad Placeholder (Google AdSense banner ad)</p>
     </div>
 
@@ -142,7 +193,6 @@
     <section id="stocks" class="stocks">
         <h2>Akcie Společností</h2>
         <div class="stock-grid">
-            <!-- Example Stock Item -->
             <div class="stock-item" onclick="window.location.href='stocks/stock1.html'">Komerční Banka</div>
             <div class="stock-item" onclick="window.location.href='stocks/stock2.html'">Moneta Money Bank</div>
             <div class="stock-item" onclick="window.location.href='stocks/stock3.html'">ČEZ</div>
@@ -151,13 +201,10 @@
             <div class="stock-item" onclick="window.location.href='stocks/stock6.html'">Gevorkyan</div>
             <div class="stock-item" onclick="window.location.href='stocks/stock7.html'">COLT CZ</div>
             <div class="stock-item" onclick="window.location.href='stocks/stock8.html'">Kofola</div>
-            <!-- Add more stocks as needed -->
         </div>
     </section>
 
-    <!-- Ad placeholder after Stock Grid section -->
     <div class="ad-placeholder">
-        <!-- Google AdSense code for sidebar ad -->
         <p>Ad Placeholder (Google AdSense sidebar ad)</p>
     </div>
 
@@ -169,13 +216,10 @@
             <li><a href="#">Nová regulace ovlivní ceny akcií ve střední Evropě</a></li>
             <li><a href="#">Komerční Banka oznámila rekordní zisky za Q3</a></li>
             <li><a href="#">ČEZ plánuje expanzi na zahraniční trhy</a></li>
-            <!-- Add more news items as needed -->
         </ul>
     </section>
 
-    <!-- Ad placeholder after News section -->
     <div class="ad-placeholder">
-        <!-- Google AdSense code for bottom banner ad -->
         <p>Ad Placeholder (Google AdSense bottom banner ad)</p>
     </div>
 
@@ -183,7 +227,14 @@
 
 <footer>
     <p>&copy; 2024 CzechMarketCap. Všechna práva vyhrazena.</p>
+    <a href="cookie-policy.html">Cookie Policy</a>
 </footer>
+
+<!-- Cookie Consent Popup -->
+<div class="cookie-consent">
+    <p>We use cookies to enhance your experience on our website. By continuing, you agree to our <a href="cookie-policy.html" style="color: #4fc3f7;">Cookie Policy</a>.</p>
+    <button onclick="acceptCookies()">Accept</button>
+</div>
 
 </body>
 </html>
