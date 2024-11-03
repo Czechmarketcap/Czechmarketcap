@@ -51,6 +51,32 @@
             max-width: 600px;
             margin: 20px auto;
         }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .toggle-button, .statement-select {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .toggle-button:hover, .statement-select:hover {
+            background-color: #005f8f;
+        }
+        .statement-select {
+            color: #333;
+            background-color: #f4f4f9;
+            cursor: pointer;
+            padding: 8px;
+            font-size: 16px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -77,6 +103,17 @@
         </ul>
     </section>
 
+    <!-- Controls for Quarterly/Yearly and Statement Type -->
+    <div class="controls">
+        <button class="toggle-button" onclick="toggleData()">Zobrazit Čtvrtletní / Roční Výsledky</button>
+        <select class="statement-select" onchange="changeStatementType(this.value)">
+            <option value="general">General</option>
+            <option value="income">Income Statement</option>
+            <option value="balance">Balance Sheet</option>
+            <option value="cashflow">Cash Flow Statement</option>
+        </select>
+    </div>
+
     <!-- Chart Section -->
     <div class="chart-container">
         <canvas id="myChart"></canvas> <!-- Placeholder for the chart -->
@@ -94,25 +131,8 @@
                     <th>EBITDA (mil. CZK)</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr onclick="updateChart('2021', [1200, 150, 300])">
-                    <td>2021</td>
-                    <td>1200</td>
-                    <td>150</td>
-                    <td>300</td>
-                </tr>
-                <tr onclick="updateChart('2022', [1300, 180, 320])">
-                    <td>2022</td>
-                    <td>1300</td>
-                    <td>180</td>
-                    <td>320</td>
-                </tr>
-                <tr onclick="updateChart('2023', [1400, 200, 350])">
-                    <td>2023</td>
-                    <td>1400</td>
-                    <td>200</td>
-                    <td>350</td>
-                </tr>
+            <tbody id="table-body">
+                <!-- Rows will be dynamically updated based on selected data type -->
             </tbody>
         </table>
     </section>
@@ -124,46 +144,100 @@
 </footer>
 
 <script>
+    // Sample data for different statements
+    const dataSets = {
+        general: [
+            { year: '2021', revenues: 1200, netIncome: 150, ebitda: 300 },
+            { year: '2022', revenues: 1300, netIncome: 180, ebitda: 320 },
+            { year: '2023', revenues: 1400, netIncome: 200, ebitda: 350 }
+        ],
+        income: [
+            { year: '2021', revenues: 1100, netIncome: 100, ebitda: 200 },
+            { year: '2022', revenues: 1200, netIncome: 130, ebitda: 220 },
+            { year: '2023', revenues: 1300, netIncome: 150, ebitda: 250 }
+        ],
+        balance: [
+            { year: '2021', assets: 2000, liabilities: 1200, equity: 800 },
+            { year: '2022', assets: 2200, liabilities: 1300, equity: 900 },
+            { year: '2023', assets: 2400, liabilities: 1400, equity: 1000 }
+        ],
+        cashflow: [
+            { year: '2021', operating: 400, investing: -100, financing: 200 },
+            { year: '2022', operating: 450, investing: -120, financing: 220 },
+            { year: '2023', operating: 500, investing: -150, financing: 250 }
+        ]
+    };
+
+    let isYearly = true;
+    let currentStatement = 'general';
+
     // Initialize Chart.js chart
     const ctx = document.getElementById('myChart').getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Tržby', 'Čistý Zisk', 'EBITDA'], // Labels for the dataset
+            labels: ['Tržby', 'Čistý Zisk', 'EBITDA'], // Default labels for General statement
             datasets: [{
                 label: 'Finanční Výsledky 2021',
-                data: [1200, 150, 300], // Initial data (for 2021)
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(153, 102, 255, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(153, 102, 255, 1)'
-                ],
+                data: [1200, 150, 300],
+                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'],
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
+            scales: { y: { beginAtZero: true } }
         }
     });
 
-    // Update chart function when a row is clicked
     function updateChart(year, data) {
         myChart.data.datasets[0].label = 'Finanční Výsledky ' + year;
         myChart.data.datasets[0].data = data;
         myChart.update();
     }
+
+    function toggleData() {
+        isYearly = !isYearly;
+        populateTable();
+    }
+
+    function changeStatementType(type) {
+        currentStatement = type;
+        updateChartLabels();
+        populateTable();
+    }
+
+    function updateChartLabels() {
+        const labels = {
+            general: ['Tržby', 'Čistý Zisk', 'EBITDA'],
+            income: ['Revenues', 'Net Income', 'EBITDA'],
+            balance: ['Assets', 'Liabilities', 'Equity'],
+            cashflow: ['Operating', 'Investing', 'Financing']
+        };
+        myChart.data.labels = labels[currentStatement];
+        myChart.update();
+    }
+
+    function populateTable() {
+        const tableBody = document.getElementById("table-body");
+        tableBody.innerHTML = "";
+        const data = dataSets[currentStatement];
+        
+        data.forEach(item => {
+            const row = document.createElement("tr");
+            const values = Object.values(item).slice(1);
+            row.innerHTML = `<td>${item.year}</td><td>${values[0]}</td><td>${values[1]}</td><td>${values[2]}</td>`;
+            row.onclick = () => updateChart(item.year, values);
+            tableBody.appendChild(row);
+        });
+
+        updateChart(data[0].year, Object.values(data[0]).slice(1));
+    }
+
+    // Initial load
+    populateTable();
 </script>
 
 </body>
 </html>
-
