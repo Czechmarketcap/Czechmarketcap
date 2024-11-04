@@ -1,340 +1,353 @@
 <!DOCTYPE html>
 <html lang="cs">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CzechMarketCap</title>
     <style>
-      /* Basic styling */
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f9;
-      }
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
 
-      header,
-      footer {
-        background-color: #007acc;
-        color: #fff;
-        text-align: left;
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+        header, footer {
+            background-color: #007acc;
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-      h1,
-      h2 {
-        color: #333;
-      }
+        h1, h2 {
+            color: #333;
+        }
 
-      .container {
-        width: 90%;
-        margin: auto;
-        overflow: hidden;
-      }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
 
-      /* Logo styling */
-      .logo {
-        display: flex;
-        align-items: center;
-      }
+        /* Logo styling */
+        .logo {
+            display: flex;
+            align-items: center;
+        }
 
-      .logo img {
-        height: 50px;
-        margin-right: 15px;
-      }
+        .logo img {
+            height: 50px;
+            margin-right: 15px;
+        }
 
-      /* Navigation styling */
-      nav {
-        display: flex;
-        gap: 15px;
-        font-size: 1.1em;
-      }
+        /* Navigation styling */
+        nav {
+            display: flex;
+            gap: 15px;
+            font-size: 1.1em;
+        }
 
-      nav a {
-        color: #fff;
-        text-decoration: none;
-        padding: 5px 10px;
-      }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+        }
 
-      nav a:hover {
-        background-color: #005a99;
-        border-radius: 5px;
-      }
+        nav a:hover {
+            background-color: #005a99;
+            border-radius: 5px;
+        }
 
-      /* Search bar styling */
-      .search-bar {
-        display: flex;
-        align-items: center;
-      }
+        /* Search bar styling */
+        .search-bar {
+            display: flex;
+            align-items: center;
+        }
 
-      .search-bar input[type="text"] {
-        padding: 5px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-      }
+        .search-bar input[type="text"] {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
 
-      /* About Us section styling */
-      .about {
-        background: #e2e2e2;
-        padding: 20px;
-        margin: 20px 0;
-      }
+        /* About Us section styling */
+        .about {
+            background: #e2e2e2;
+            padding: 20px;
+            margin: 20px 0;
+        }
 
-      /* Stock Grid styling */
-      .stock-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
+        /* Stock Grid styling */
+        .stock-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
 
-      .stock-item {
-        background: #fff;
-        padding: 15px;
-        width: 30%;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        text-align: center;
-        cursor: pointer;
-        transition: transform 0.3s;
-      }
+        .stock-item {
+            background: #fff;
+            padding: 15px;
+            width: 30%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
 
-      .stock-item:hover {
-        transform: scale(1.05);
-        background-color: #e8f4fc;
-      }
+        .stock-item:hover {
+            transform: scale(1.05);
+            background-color: #e8f4fc;
+        }
 
-      /* News section styling */
-      .news {
-        background: #fff;
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        margin: 20px 0;
-      }
+        /* News section styling */
+        .news {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
 
-      .news-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
+        .news-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: nowrap; /* Prevent wrapping */
+        }
 
-      .news-item {
-        background: #f8f8f8;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        overflow: hidden;
-        text-align: center;
-        transition: transform 0.3s;
-        padding: 15px;
-        width: 30%;
-        cursor: pointer;
-      }
+        .news-item {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.3s;
+            padding: 15px;
+            width: 32%; /* Ensures three items fit in a row */
+            cursor: pointer;
+        }
 
-      .news-item:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      }
+        .news-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
 
-      .news-item img {
-        width: 150px;
-        height: 150px;
-        object-fit: cover;
-      }
+        .news-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
 
-      .news-item h3 {
-        font-size: 1.1em;
-        color: #007acc;
-        margin: 10px 0;
-        padding: 0 10px;
-      }
+        .news-item h3 {
+            font-size: 1.1em;
+            color: #007acc;
+            margin: 10px 0;
+            padding: 0 10px;
+        }
 
-      .news-item p {
-        font-size: 0.9em;
-        padding: 0 10px 10px;
-        color: #555;
-      }
+        .news-item p {
+            font-size: 0.9em;
+            padding: 0 10px 10px;
+            color: #555;
+        }
 
-      .read-more {
-        display: none;
-        font-size: 0.9em;
-        color: #444;
-        padding: 10px;
-        background: #e9f4ff;
-      }
+        .read-more {
+            display: none;
+            font-size: 0.9em;
+            color: #444;
+            padding: 10px;
+            background: #e9f4ff;
+        }
 
-      .news-item button {
-        background-color: #007acc;
-        color: #fff;
-        border: none;
-        padding: 8px 12px;
-        cursor: pointer;
-        margin-bottom: 10px;
-        border-radius: 5px;
-      }
+        .news-item button {
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
 
-      .news-item button:hover {
-        background-color: #005a99;
-      }
+        .news-item button:hover {
+            background-color: #005a99;
+        }
 
-      /* Footer styling */
-      footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        font-size: 0.9em;
-      }
+        /* Footer styling */
+        footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+        }
 
-      footer a {
-        color: #fff;
-        text-decoration: underline;
-        margin-left: 10px;
-      }
+        footer a {
+            color: #fff;
+            text-decoration: underline;
+            margin-left: 10px;
+        }
 
-      /* Cookie Consent styling */
-      .cookie-consent {
-        display: none;
-        /* Initially hidden */
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        background-color: #333;
-        color: #fff;
-        text-align: center;
-        padding: 15px;
-        font-size: 0.9em;
-        z-index: 1000;
-      }
+        /* Cookie Consent styling */
+        .cookie-consent {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
 
-      .cookie-consent button {
-        background-color: #007acc;
-        color: #fff;
-        border: none;
-        padding: 10px 15px;
-        margin-left: 10px;
-        cursor: pointer;
-        border-radius: 5px;
-      }
+        .cookie-consent button {
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-      .cookie-consent button:hover {
-        background-color: #005a99;
-      }
+        .cookie-consent button:hover {
+            background-color: #005a99;
+        }
     </style>
     <script>
-      // Toggle Read More content
-      function toggleReadMore(event) {
-        const readMoreContent = event.currentTarget.parentNode.querySelector('.read-more');
-        if (readMoreContent.style.display === 'block') {
-          readMoreContent.style.display = 'none';
-          event.currentTarget.textContent = 'Read More';
-        } else {
-          readMoreContent.style.display = 'block';
-          event.currentTarget.textContent = 'Read Less';
+        function toggleReadMore(event) {
+            const readMoreContent = event.currentTarget.parentNode.querySelector('.read-more');
+            if (readMoreContent.style.display === 'block') {
+                readMoreContent.style.display = 'none';
+                event.currentTarget.textContent = 'Read More';
+            } else {
+                readMoreContent.style.display = 'block';
+                event.currentTarget.textContent = 'Read Less';
+            }
         }
-      }
-      // Check for cookie consent on page load
-      window.addEventListener('load', () => {
-        if (!localStorage.getItem('cookieConsentAccepted')) {
-          document.querySelector('.cookie-consent').style.display = 'block';
+
+        window.addEventListener('load', () => {
+            if (!localStorage.getItem('cookieConsentAccepted')) {
+                document.querySelector('.cookie-consent').style.display = 'block';
+            }
+        });
+
+        function acceptCookies() {
+            localStorage.setItem('cookieConsentAccepted', 'true');
+            document.querySelector('.cookie-consent').style.display = 'none';
         }
-      });
-      // Handle cookie consent acceptance
-      function acceptCookies() {
-        localStorage.setItem('cookieConsentAccepted', 'true');
-        document.querySelector('.cookie-consent').style.display = 'none';
-      }
     </script>
-  </head>
-  <body>
-    <header>
-      <div class="header-content">
+</head>
+<body>
+
+<header>
+    <div class="header-content">
         <div class="logo">
-          <img src="CzechMarketCap_logo.png" alt="CzechMarketCap Logo">
+            <img src="CzechMarketCap_logo.png" alt="CzechMarketCap Logo">
         </div>
         <h1>CzechMarketCap</h1>
-      </div>
-      <nav>
+    </div>
+    <nav>
         <a href="#about">O nás</a>
         <a href="#stocks">Akcie</a>
         <a href="#news">Novinky</a>
-      </nav>
-      <div class="search-bar">
+    </nav>
+    <div class="search-bar">
         <input type="text" placeholder="Hledat...">
-      </div>
-    </header>
-    <div class="container">
-      <!-- About Us Section -->
-      <section id="about" class="about">
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- About Us Section -->
+    <section id="about" class="about">
         <h2>O Nás</h2>
         <p>Naším cílem je poskytovat komplexní data o veřejně obchodovaných společnostech v České republice. Sledujeme finanční výkazy, tržní trendy a další důležité metriky, abychom našim uživatelům přinášeli spolehlivé informace pro jejich investiční rozhodnutí.</p>
-      </section>
-      <div class="ad-placeholder">
+    </section>
+
+    <div class="ad-placeholder">
         <p>Ad Placeholder (Google AdSense banner ad)</p>
-      </div>
-      <!-- Stock Grid Section -->
-      <section id="stocks" class="stocks">
+    </div>
+
+    <!-- Stock Grid Section -->
+    <section id="stocks" class="stocks">
         <h2>Akcie Společností</h2>
         <div class="stock-grid">
-          <div class="stock-item" onclick="window.location.href='stocks/stock1.html'">Komerční Banka</div>
-          <div class="stock-item" onclick="window.location.href='stocks/stock2.html'">Moneta Money Bank</div>
-          <div class="stock-item" onclick="window.location.href='stocks/stock3.html'">ČEZ</div>
-          <div class="stock-item" onclick="window.location.href='stocks/stock4.html'">Vienna Insurance Group</div>
-          <div class="stock-item" onclick="window.location.href='stocks/stock5.html'">Erste Group</div>
-          <div class="stock-item" onclick="window.location.href='stocks/stock6.html'">Gevorkyan</div>
-          <div class="stock-item" onclick="window.location.href='stocks/stock7.html'">COLT CZ</div>
-          <div class="stock-item" onclick="window.location.href='stocks/stock8.html'">Kofola</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock1.html'">Komerční Banka</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock2.html'">Moneta Money Bank</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock3.html'">ČEZ</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock4.html'">Vienna Insurance Group</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock5.html'">Erste Group</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock6.html'">Gevorkyan</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock7.html'">COLT CZ</div>
+            <div class="stock-item" onclick="window.location.href='stocks/stock8.html'">Kofola</div>
         </div>
-      </section>
-      <div class="ad-placeholder">
-        <p>Ad Placeholder (Google AdSense sidebar ad)</p>
-      </div>
-      <!-- Interactive News Section -->
-      <section id="news" class="news">
-        <h2>Novinky</h2 <div class="news-grid">
-        <!-- News Item 1 -->
-        <div class="news-item">
-          <h3 onclick="window.location.href='news/article1.html'">Nová regulace ovlivní ceny akcií ve střední Evropě</h3>
-          <p>Krátký popis nebo upoutávka na článek o nové regulaci.</p>
-          <div class="read-more">
-            <p>Detailnější informace o tom, jak nová regulace ovlivní investiční trh v regionu střední Evropy. Další podrobnosti k tématu...</p>
-          </div>
-          <button onclick="toggleReadMore(event)">Read More</button>
-        </div>
-        <!-- News Item 2 -->
-        <div class="news-item">
-          <h3 onclick="window.location.href='news/article2.html'">Komerční Banka oznámila rekordní zisky za Q3</h3>
-          <p>Krátký popis nebo upoutávka na článek o ziscích Komerční Banky.</p>
-          <div class="read-more">
-            <p>Podrobné informace o finančním úspěchu Komerční Banky v posledním čtvrtletí a jak to může ovlivnit jejich akcie...</p>
-          </div>
-          <button onclick="toggleReadMore(event)">Read More</button>
-        </div>
-        <!-- News Item 3 -->
-        <div class="news-item">
-          <h3 onclick="window.location.href='news/article3.html'">ČEZ plánuje expanzi na zahraniční trhy</h3>
-          <p>Krátký popis nebo upoutávka na článek o expanzi společnosti ČEZ.</p>
-          <div class="read-more">
-            <p>ČEZ má ambiciózní plány na expanzi do dalších evropských zemí. Zjistěte více o jejich strategii a potenciálním dopadu...</p>
-          </div>
-          <button onclick="toggleReadMore(event)">Read More</button>
-        </div>
-    </div>
     </section>
+
     <div class="ad-placeholder">
-      <p>Ad Placeholder (Google AdSense bottom banner ad)</p>
+        <p>Ad Placeholder (Google AdSense sidebar ad)</p>
     </div>
+
+    <!-- Interactive News Section -->
+    <section id="news" class="news">
+        <h2>Novinky</h2>
+       
+        <div class="news-grid">
+            <!-- News Item 1 -->
+            <div class="news-item">
+                <img src="path/to/image1.jpg" alt="News Image 1" onclick="window.location.href='news/article1.html'">
+                <h3 onclick="window.location.href='news/article1.html'">Nová regulace ovlivní ceny akcií ve střední Evropě</h3>
+                <p>Krátký popis nebo upoutávka na článek o nové regulaci.</p>
+                <div class="read-more">
+                    <p>Detailnější informace o tom, jak nová regulace ovlivní investiční trh v regionu střední Evropy. Další podrobnosti k tématu...</p>
+                </div>
+                <button onclick="toggleReadMore(event)">Read More</button>
+            </div>
+
+            <!-- News Item 2 -->
+            <div class="news-item">
+                <img src="path/to/image2.jpg" alt="News Image 2" onclick="window.location.href='news/article2.html'">
+                <h3 onclick="window.location.href='news/article2.html'">Komerční Banka oznámila rekordní zisky za Q3</h3>
+                <p>Krátký popis nebo upoutávka na článek o ziscích Komerční Banky.</p>
+                <div class="read-more">
+                    <p>Podrobné informace o finančním úspěchu Komerční Banky v posledním čtvrtletí a jak to může ovlivnit jejich akcie...</p>
+                </div>
+                <button onclick="toggleReadMore(event)">Read More</button>
+            </div>
+
+            <!-- News Item 3 -->
+            <div class="news-item">
+                <img src="path/to/image3.jpg" alt="News Image 3" onclick="window.location.href='news/article3.html'">
+                <h3 onclick="window.location.href='news/article3.html'">ČEZ plánuje expanzi na zahraniční trhy</h3>
+                <p>Krátký popis nebo upoutávka na článek o expanzi společnosti ČEZ.</p>
+                <div class="read-more">
+                    <p>ČEZ má ambiciózní plány na expanzi do dalších evropských zemí. Zjistěte více o jejich strategii a potenciálním dopadu...</p>
+                </div>
+                <button onclick="toggleReadMore(event)">Read More</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="ad-placeholder">
+        <p>Ad Placeholder (Google AdSense bottom banner ad)</p>
     </div>
-    <footer>
-      <p>&copy; 2024 CzechMarketCap. Všechna práva vyhrazena.</p>
-      <a href="cookie-policy.html">Cookie Policy</a>
-    </footer>
-    <!-- Cookie Consent Popup -->
-    <div class="cookie-consent">
-      <p>We use cookies to enhance your experience on our website. By continuing, you agree to our <a href="cookie-policy.html" style="color: #4fc3f7;">Cookie Policy</a>. </p>
-      <button onclick="acceptCookies()">Accept</button>
-    </div>
-  </body>
+
+</div>
+
+<footer>
+    <p>&copy; 2024 CzechMarketCap. Všechna práva vyhrazena.</p>
+    <a href="cookie-policy.html">Cookie Policy</a>
+</footer>
+
+<!-- Cookie Consent Popup -->
+<div class="cookie-consent">
+    <p>We use cookies to enhance your experience on our website. By continuing, you agree to our <a href="cookie-policy.html" style="color: #4fc3f7;">Cookie Policy</a>.</p>
+    <button onclick="acceptCookies()">Accept</button>
+</div>
+
+</body>
 </html>
